@@ -105,4 +105,4 @@ pnpm build
 
 Contributions are currently closed as we're setting up the project infrastructure. A detailed contribution guide will be available in the coming days.
 
-If you're interested in joining the beta phase, you can join our private Discord community: [Discord Invite](https://discord.gg/placeholder)
+If you're interested in joining the beta phase, you can join our private Discord community: [Discord Invite](https://hub.mdsaban.com/?ref=secret)
