@@ -9,7 +9,7 @@ export const twitterHandler: DeepLinkHandler = {
       return null;
     }
 
-    const username = match[1].toLowerCase();
+    const username = match[1].replace(/^@/, '').toLowerCase();
 
     const reservedPaths = new Set([
       'home',
@@ -20,6 +20,8 @@ export const twitterHandler: DeepLinkHandler = {
       'notifications',
       'messages',
       'settings',
+      'search',
+      'compose',
     ]);
 
     if (reservedPaths.has(username)) {
