@@ -38,19 +38,66 @@ function extractYouTubeVideoId(url: string): string | null {
 
 /**
  * Extract timestamp from YouTube URL (e.g., ?t=123 or &t=123s)
- * Supports formats: 123 (seconds), 1m23s, 1h2m3s, 2m, 1h
+ * Supports formats: 123 (seconds), 1m23s, 1h2m3s, 2m, 1h, 1h30m, 1h30s
  */
 function extractTimestamp(url: string): string | null {
-  // Match t= parameter with proper timestamp format validation
-  // Valid formats: plain seconds (123) or time units (1h2m3s, 1m23s, 2m, 1h, 123s)
-  const tMatch = url.match(/[?&]t=(\d+(?:h(?:\d+m)?(?:\d+s)?|m(?:\d+s)?|s)?)/);
-  if (tMatch) return tMatch[1];
+  // Match t= parameter with various timestamp formats
+  // Valid formats: plain seconds (123), seconds with suffix (123s),
+  // or time units combinations (1h2m3s, 1m23s, 2m, 1h, 1h30m, 1h30s)
+  const tMatch = url.match(/[?&]t=((?:\d+h)?(?:\d+m)?(?:\d+s?)?)/);
+  if (tMatch && tMatch[1]) return tMatch[1];
 
   // Match start= parameter (alternative timestamp format, plain seconds only)
   const startMatch = url.match(/[?&]start=(\d+)/);
   if (startMatch) return startMatch[1];
 
   return null;
+}
+
+/**
+ * Convert timestamp string to seconds
+ * Handles formats: "123", "123s", "2m", "1m23s", "1h", "1h30m", "1h2m3s", "1h30s"
+ * Returns the total number of seconds, or 0 if parsing fails
+ */
+function parseTimestampToSeconds(timestamp: string): number {
+  // Handle empty or whitespace-only input
+  if (!timestamp || !timestamp.trim()) {
+    return 0;
+  }
+
+  const trimmed = timestamp.trim();
+
+  // Check if it's plain seconds (digits only, no suffix)
+  if (/^\d+$/.test(trimmed)) {
+    const seconds = parseInt(trimmed, 10);
+    return isNaN(seconds) ? 0 : seconds;
+  }
+
+  // Parse formatted timestamp (e.g., "1h2m3s", "1m23s", "2m", "123s", "1h30m", "1h30s")
+  const hoursMatch = trimmed.match(/(\d+)h/);
+  const minutesMatch = trimmed.match(/(\d+)m/);
+  const secondsMatch = trimmed.match(/(\d+)s/);
+
+  // If no time unit markers found but we have digits, treat as invalid format
+  if (!hoursMatch && !minutesMatch && !secondsMatch) {
+    return 0;
+  }
+
+  const hours = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
+  const minutes = minutesMatch ? parseInt(minutesMatch[1], 10) : 0;
+  const seconds = secondsMatch ? parseInt(secondsMatch[1], 10) : 0;
+
+  // Guard against NaN values
+  if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) {
+    return 0;
+  }
+
+  // Guard against negative values (shouldn't happen with \d+ but be defensive)
+  if (hours < 0 || minutes < 0 || seconds < 0) {
+    return 0;
+  }
+
+  return hours * 3600 + minutes * 60 + seconds;
 }
 
 export const youtubeHandler: DeepLinkHandler = {
@@ -71,10 +118,15 @@ export const youtubeHandler: DeepLinkHandler = {
     let androidDeepLink = `intent://watch?v=${videoId}`;
 
     if (timestamp) {
-      // Convert timestamp to seconds if needed (e.g., "1m23s" -> 83)
-      const timestampParam = timestamp.match(/^\d+$/) ? `&t=${timestamp}s` : `&t=${timestamp}`;
-      iosDeepLink += timestampParam;
-      androidDeepLink += timestampParam;
+      // Convert timestamp to seconds (e.g., "1m23s" -> 83, "123" -> 123)
+      const seconds = parseTimestampToSeconds(timestamp);
+
+      // Only append timestamp if we got a valid positive value
+      if (seconds > 0) {
+        const timestampParam = `&t=${seconds}s`;
+        iosDeepLink += timestampParam;
+        androidDeepLink += timestampParam;
+      }
     }
 
     androidDeepLink += '#Intent;scheme=vnd.youtube;package=com.google.android.youtube;end';
