@@ -1,8 +1,11 @@
 import {
+  threadsHandler,
   instagramHandler,
   linkedinHandler,
   unknownHandler,
+  whatsappHandler,
   youtubeHandler,
+  facebookHandler,
   spotifyHandler,
   discordHandler,
 } from './platforms';
@@ -14,8 +17,11 @@ const handlers = [
   youtubeHandler,
   linkedinHandler,
   instagramHandler,
-  spotifyHandler,
   discordHandler,
+  facebookHandler,
+  spotifyHandler,
+  whatsappHandler,
+  threadsHandler
 ];
 export function generateDeepLink(url: string): DeepLinkResult {
   const webUrl = url.trim();
