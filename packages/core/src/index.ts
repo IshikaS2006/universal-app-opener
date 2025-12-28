@@ -7,6 +7,7 @@ import {
   youtubeHandler,
   facebookHandler,
   spotifyHandler,
+  discordHandler,
 } from './platforms';
 import { DeepLinkResult } from './types';
 
@@ -16,6 +17,7 @@ const handlers = [
   youtubeHandler,
   linkedinHandler,
   instagramHandler,
+  discordHandler,
   facebookHandler,
   spotifyHandler,
   whatsappHandler,

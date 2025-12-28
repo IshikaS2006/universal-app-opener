@@ -7,6 +7,7 @@ import { spotifyHandler } from './spotify';
 import { whatsappHandler } from './whatsapp';
 import { threadsHandler } from "./threads";
 import { redditHandler } from './reddit';
+import { discordHandler } from './discord';
 
 export {
     linkedinHandler,
@@ -17,6 +18,7 @@ export {
     whatsappHandler,
     facebookHandler,
     redditHandler,
+    discordHandler,
     unknownHandler
 }
 
