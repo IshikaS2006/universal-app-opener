@@ -21,15 +21,24 @@ function displayResult(result: ReturnType<typeof generateDeepLink>) {
   outputSection.classList.remove('hidden');
 }
 
+function getLinkDetails(link: HTMLAnchorElement, e: PointerEvent) {
+  e.preventDefault();
+  const isModifierPressed = e.ctrlKey || e.metaKey || e.button === 1;
+  const url = link.getAttribute('data-url');
+  const target = link.getAttribute('target');
+  if (url) {
+    handleLinkClick(url, isModifierPressed || target === '_blank');
+  }
+}
+
 exampleLinks.forEach((link) => {
   link.addEventListener('click', (e) => {
-    e.preventDefault();
-    const isCtrlPressed = e.ctrlKey;
-    const url = link.getAttribute('data-url');
-    const target = link.getAttribute('target');
-    if (url) {
-      handleLinkClick(url, isCtrlPressed || target === '_blank');
-    }
+    getLinkDetails(link, e);
+  });
+
+  // To get mouse wheel click
+  link.addEventListener('auxclick', (e) => {
+    getLinkDetails(link, e);
   });
 });
 
